@@ -2,7 +2,7 @@
   "profiles": {
     "ElfDiff": {
       "commandName": "Project",
-      "commandLineArgs": "ASW_em-1.elf ASW_em-2.elf"
+      "commandLineArgs": "C.elf STAINLESS.elf"
     }
   }
 }

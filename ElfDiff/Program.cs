@@ -11,15 +11,11 @@ class Program
 {
     private static string NormalizeSymbolName(string _s)
     {
-        var lastDot = _s.LastIndexOf('.');
-        if (lastDot == -1)
+        var firstDot = _s.IndexOf('.');
+        if (firstDot == -1)
             return _s;
-
-        var afterDot = _s[(lastDot + 1)..];
-        if (int.TryParse(afterDot, out var i) && i.ToString() == afterDot)
-            return $"{_s[..lastDot]}.######";
-
-        return _s;
+        else
+            return $"{_s[..firstDot]}.######";
     }
 
     enum TypeSortOrder
@@ -32,6 +28,19 @@ class Program
     private static void ShowUsage()
     {
         System.CommandLine.DragonFruit.CommandLine.InvokeMethod(new[] { "-?" }, System.CommandLine.DragonFruit.EntryPointDiscoverer.FindStaticEntryMethod(Assembly.GetExecutingAssembly()));
+    }
+
+    private static string? FormatDiff(uint? _size, uint? _base)
+    {
+        _size ??= 0;
+        _base ??= 0;
+
+        if (_size > _base)
+            return $"(+{_size - _base})".StyleBrightRed();
+        else if (_size < _base)
+            return $"(-{_base - _size})".StyleBrightGreen();
+        else
+            return null;
     }
 
     /// <summary>
@@ -57,7 +66,9 @@ class Program
                 .ToArray();
         foreach (var section in sections)
         {
-            var t = new Log.Table(new[] { section }.Concat(args).ToArray(), new[] { 40 }.Concat(args.Select(f => f.Length)).ToArray());
+            var t = new Log.Table(
+                new[] { section }.Concat(args.SelectMany((s, i) => (i == 0) ? new[] { s } : new[] { s, "" })).ToArray(),
+                new[] { 40 }.Concat(args.SelectMany((f, i) => (i == 0) ? new[] { f.Length } : new[] { f.Length, 10 })).ToArray());
 
             var types = elfFiles.Select(f => f.Sections
                 .OfType<SymbolTable<uint>>()
@@ -87,7 +98,7 @@ class Program
                             {
                                 var sizeDiff = types[0].Contains(tn) ? (long)types[0][tn].First().Size : 0;
                                 for (var i = 1; i < types.Length; i++)
-                                    if(types[i].Contains(tn))
+                                    if (types[i].Contains(tn))
                                         sizeDiff -= types[i][tn].First().Size;
 
                                 return sizeDiff;
@@ -102,7 +113,7 @@ class Program
                 if (symbolSizes.Distinct().Count() > 1)
                 {
                     t.WriteLine(new object?[] { typeName }
-                        .Concat(symbolSizes.Cast<object>())
+                        .Concat(symbolSizes.SelectMany((s, i) => (i == 0) ? new object?[] { s } : new object?[] { s, FormatDiff(s, symbolSizes[0]) }))
                         .ToArray());
                 }
             }
@@ -113,7 +124,7 @@ class Program
                 .ToArray();
             if (!show_all_sections || sectionSizes.Distinct().Count() > 1)
                 t.WriteBoldLine(new object?[] { "Total" }
-                    .Concat(sectionSizes.Cast<object>())
+                    .Concat(sectionSizes.SelectMany((s, i) => (i == 0) ? new object?[] { s } : new object?[] { s, FormatDiff(s, sectionSizes[0]) }))
                     .ToArray());
 
             Console.WriteLine();

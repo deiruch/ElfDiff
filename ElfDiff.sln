@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.31423.177
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ElfDiff", "ElfDiff\ElfDiff.csproj", "{111EEA74-6AA8-4A26-9BF7-31E7A779A3DF}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ElfDiff", "ElfDiff\ElfDiff.csproj", "{111EEA74-6AA8-4A26-9BF7-31E7A779A3DF}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
